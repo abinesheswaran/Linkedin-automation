@@ -18,22 +18,34 @@ function automateEasyApply() {
           if (easyApplyButton) {
             easyApplyButton.click();
 
-            // Wait for the "Easy Apply" process to be initiated before clicking "Next"
+            // Wait for the "Easy Apply" process to be initiated before clicking the first "Next" button
             setTimeout(() => {
-              const nextButton = document.querySelector(
+              const nextButton1 = document.querySelector(
                 'button[data-easy-apply-next-button]'
               );
-              if (nextButton) {
-                nextButton.click();
+              if (nextButton1) {
+                nextButton1.click();
+
+                // Wait for the first "Next" button to be processed before clicking the second "Next" button
+                setTimeout(() => {
+                  const nextButton2 = document.querySelector(
+                    'button[aria-label="Continue to next step"]'
+                  );
+                  if (nextButton2) {
+                    nextButton2.click();
+                  }
+
+                  // Stop after the first job listing if testMode is true
+                  if (testMode) {
+                    console.log('Test mode: Stopping after first job listing.');
+                    return;
+                  }
+
+                  // Proceed to the next job listing if testMode is false
+                  setTimeout(() => clickApplyWithDelay(index + 1), 2000);
+                }, 1000); // Adjust the delay if needed to match loading time for the second "Next" button
               }
-              // Stop after the first job listing if testMode is true
-              if (testMode) {
-                console.log('Test mode: Stopping after first job listing.');
-                return;
-              }
-              // Proceed to the next job listing if testMode is false
-              setTimeout(() => clickApplyWithDelay(index + 1), 2000);
-            }, 1000); // Adjust the delay if needed to match loading time for "Next" button
+            }, 1000); // Adjust the delay if needed to match loading time for the first "Next" button
           }
         }, 1000); // Adjust the delay if needed to match loading time for "Easy Apply" button
       } else {
