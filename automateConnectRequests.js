@@ -1,5 +1,14 @@
 function fn(maxCount) {
+    let gotItClickCount = 0;
+
     function triggerConnectAndSend() {
+        // Click "Got it" button if it exists and hasn't been clicked 4 times yet
+        var gotItButton = document.querySelector('button[aria-label="Got it"]');
+        if (gotItButton && gotItClickCount < 4) {
+            gotItButton.click();
+            gotItClickCount++;
+        }
+
         var buttons = document.querySelectorAll('.artdeco-button--2');
         var connectButtonClicked = false;
 
