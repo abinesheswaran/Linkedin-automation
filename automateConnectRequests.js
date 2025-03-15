@@ -59,7 +59,7 @@ function fn(maxCount) {
 
         for (const button of buttons) {
             const text = button.textContent.trim();
-            if (text === 'Follow' || text === 'Message' text === 'Pending') {
+            if (text === 'Follow' || text === 'Message' || text === 'Pending') {
                 followOrMessageButtonFound = true;
                 break;
             }
