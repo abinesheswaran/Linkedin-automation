@@ -1,0 +1,102 @@
+setInterval(() => {
+    // 1. Check if the "Send without a note" popup is currently open
+    // We look for the modal wrapper or the button itself.
+    const isPopupOpen = document.querySelector('div[role="dialog"]') || document.querySelector('.artdeco-modal');
+
+    if (isPopupOpen) {
+        console.log("⏸️ Popup detected. Waiting for you to manually click 'Send'...");
+        return; // Do nothing until YOU close the popup
+    }
+
+    // 2. If NO popup is open, find the next Connect button
+    const allButtons = Array.from(document.querySelectorAll('button, a'));
+    
+    // Find the first button that strictly says "Connect" or has the Invite aria-label
+    const connectBtn = allButtons.find(btn => {
+        const text = btn.innerText.trim();
+        const label = (btn.getAttribute('aria-label') || "").toLowerCase();
+        
+        // It must be visible and matching the Connect criteria
+        return (text === 'Connect' || (label.includes('invite') && label.includes('connect')))
+               && !btn.disabled; 
+    });
+
+    // 3. Click it
+    if (connectBtn) {
+        console.log("👉 Clicking Connect...");
+        connectBtn.click();
+        connectBtn.focus(); // Focus on it to ensure the click registers
+    } else {
+        console.log("...No Connect buttons found on this screen...");
+    }
+
+}, 2000); // Checks every 2 seconds
+(function runForever() {
+    console.log("🚀 Shadow Breaker Script Started! Running forever...");
+
+    // --- HELPER: The Logic That Worked (Deep Search) ---
+    function findButtonDeep(searchText) {
+        function searchRoot(root) {
+            // 1. Look for buttons in this layer
+            const buttons = Array.from(root.querySelectorAll('button, span'));
+            for (let b of buttons) {
+                // Check visible text (innerText) and aria-label
+                const txt = b.innerText ? b.innerText.trim() : "";
+                const aria = b.getAttribute('aria-label') || "";
+                
+                if (txt.includes(searchText) || aria.includes(searchText)) {
+                    // If it's a span, return the parent button
+                    return b.tagName === 'SPAN' ? b.closest('button') : b;
+                }
+            }
+
+            // 2. Recursively check Shadow DOMs
+            const allElements = root.querySelectorAll('*');
+            for (const el of allElements) {
+                if (el.shadowRoot) {
+                    const found = searchRoot(el.shadowRoot);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        return searchRoot(document);
+    }
+
+    // --- LOOP 1: The "Closer" (Clicks 'Send without a note') ---
+    // Runs FAST (every 500ms) to catch popups immediately
+    setInterval(() => {
+        const sendBtn = findButtonDeep("Send without a note");
+        
+        if (sendBtn && !sendBtn.disabled) {
+            console.log("✅ Popup detected (Deep Search). Clicking 'Send'...");
+            sendBtn.click();
+        }
+    }, 500);
+
+    // --- LOOP 2: The "Opener" (Clicks 'Connect') ---
+    // Runs SLOWER (every 3 seconds) to find new people
+    setInterval(() => {
+        // 1. Pause if a popup is currently open
+        const isPopupOpen = findButtonDeep("Send without a note");
+        if (isPopupOpen) {
+            // console.log("⏸️ Waiting for popup to close...");
+            return; 
+        }
+
+        // 2. Find "Connect" buttons (Standard + Deep Search fallback)
+        // We look for "Connect" text specifically
+        const connectBtn = findButtonDeep("Connect");
+
+        if (connectBtn && !connectBtn.disabled) {
+            console.log("👋 Found 'Connect' button. Clicking...");
+            connectBtn.click();
+            connectBtn.focus(); // Help ensuring the click registers
+        } else {
+            // Optional: If no buttons found, you might want to scroll or click Next manually
+            // console.log("...No Connect buttons visible...");
+        }
+
+    }, 3000);
+
+})();
